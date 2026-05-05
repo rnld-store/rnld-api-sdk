@@ -10,4 +10,6 @@ export type {
   LiberarParams,
   LiberarResponse,
   RemoverWhitelistParams,
+  BanParams,
+  DesbanParams,
 } from './types.js';

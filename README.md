@@ -76,6 +76,40 @@ const resultado = await client.whitelist.remover({ wl_id: 'TOKEN_DO_JOGADOR' });
 
 ---
 
+### `whitelist.ban(params)` — banir jogador
+
+Bane um jogador. `reason` é opcional.
+
+```ts
+const resultado = await client.whitelist.ban({
+  wl_id: 'TOKEN_DO_JOGADOR',
+  reason: 'Uso de cheats', // opcional
+});
+
+console.log(resultado.status);   // true | false
+console.log(resultado.mensagem);
+```
+
+| Campo    | Tipo   | Obrigatório | Descrição          |
+|----------|--------|-------------|--------------------|
+| `wl_id`  | string | sim         | Token do jogador   |
+| `reason` | string | não         | Motivo do banimento |
+
+---
+
+### `whitelist.desban(params)` — desbanir jogador
+
+Remove o banimento de um jogador.
+
+```ts
+const resultado = await client.whitelist.desban({ wl_id: 'TOKEN_DO_JOGADOR' });
+
+console.log(resultado.status);   // true | false
+console.log(resultado.mensagem);
+```
+
+---
+
 ## Tratamento de erros
 
 ```ts
@@ -95,7 +129,7 @@ try {
 ```
 
 > **Nota:** `whitelist.query()` **não lança** `RnldNotFoundError` — retorna `null` em caso de 404.
-> Os métodos `liberar()` e `remover()` **lançam** o erro normalmente.
+> Os demais métodos (`liberar`, `remover`, `ban`, `desban`) **lançam** o erro normalmente.
 
 ---
 
@@ -124,6 +158,8 @@ Comandos registrados automaticamente na guild:
 | `/wl-status` | Consulta whitelist por `discord_id` ou `wl_id` |
 | `/wl-liberar` | Libera a whitelist de um jogador |
 | `/wl-remover` | Remove a whitelist de um jogador |
+| `/wl-ban` | Bane um jogador (motivo opcional) |
+| `/wl-desban` | Desbane um jogador |
 
 ## Build
 

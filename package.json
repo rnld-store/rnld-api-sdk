@@ -1,9 +1,6 @@
 {
   "name": "@ronaldmiranda/api-sdk",
-  "publishConfig": {
-    "access": "public"
-  },
-  "version": "1.0.0",
+  "version": "1.1.2",
   "description": "SDK oficial para integração com a RNLD API — whitelist e query de jogadores",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -16,12 +13,15 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [
     "rnld",
@@ -32,8 +32,23 @@
     "sdk"
   ],
   "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rnld-store/rnld-api-sdk.git"
+  },
+  "homepage": "https://github.com/rnld-store/rnld-api-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/rnld-store/rnld-api-sdk/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "tsup": "^8.0.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vitest": "^2.0.0"
   }
 }

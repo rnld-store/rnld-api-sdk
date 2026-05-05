@@ -52,6 +52,26 @@ const commands = [
       opt.setName('wl_id')
         .setDescription('Token do jogador (wl_id)')
         .setRequired(true)),
+
+  new SlashCommandBuilder()
+    .setName('wl-ban')
+    .setDescription('Bane um jogador')
+    .addStringOption(opt =>
+      opt.setName('wl_id')
+        .setDescription('Token do jogador (wl_id)')
+        .setRequired(true))
+    .addStringOption(opt =>
+      opt.setName('reason')
+        .setDescription('Motivo do banimento')
+        .setRequired(false)),
+
+  new SlashCommandBuilder()
+    .setName('wl-desban')
+    .setDescription('Desbane um jogador')
+    .addStringOption(opt =>
+      opt.setName('wl_id')
+        .setDescription('Token do jogador (wl_id)')
+        .setRequired(true)),
 ].map(c => c.toJSON());
 
 // ---------- Registra comandos na guild ----------
@@ -112,19 +132,10 @@ client.on('interactionCreate', async (interaction) => {
       const wlId = interaction.options.getString('wl_id');
       const discordId = interaction.options.getString('discord_id');
 
-      if (discordId) {
-        const player = await rnld.whitelist.liberar({ wl_id: wlId, discordId });
-        if (player.status) {
-          return interaction.editReply(
-            `Whitelist liberada com sucesso.\n` +
-            `**Token:** \`${player.data.identities.wl_id}\``
-          );
-        } else {
-          return interaction.editReply(`Falha: ${player.mensagem}`);
-        }
-      }
-
-      const resultado = await rnld.whitelist.liberar({ wl_id: wlId });
+      const resultado = await rnld.whitelist.liberar({
+        wl_id: wlId,
+        ...(discordId ? { discordId } : {}),
+      });
 
       return interaction.editReply(
         resultado.status
@@ -140,6 +151,29 @@ client.on('interactionCreate', async (interaction) => {
       return interaction.editReply(
         resultado.status
           ? `Whitelist removida com sucesso.`
+          : `Falha: ${resultado.mensagem}`
+      );
+    }
+
+    if (commandName === 'wl-ban') {
+      const wlId   = interaction.options.getString('wl_id');
+      const reason = interaction.options.getString('reason');
+      const resultado = await rnld.whitelist.ban({ wl_id: wlId, reason });
+
+      return interaction.editReply(
+        resultado.status
+          ? `Jogador banido com sucesso.`
+          : `Falha: ${resultado.mensagem}`
+      );
+    }
+
+    if (commandName === 'wl-desban') {
+      const wlId = interaction.options.getString('wl_id');
+      const resultado = await rnld.whitelist.desban({ wl_id: wlId });
+
+      return interaction.editReply(
+        resultado.status
+          ? `Jogador desbanido com sucesso.`
           : `Falha: ${resultado.mensagem}`
       );
     }

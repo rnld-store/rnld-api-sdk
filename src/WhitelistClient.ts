@@ -6,6 +6,8 @@ import type {
   LiberarParams,
   LiberarResponse,
   RemoverWhitelistParams,
+  BanParams,
+  DesbanParams,
 } from './types.js';
 
 export class WhitelistClient {
@@ -55,6 +57,33 @@ export class WhitelistClient {
    */
   async remover(params: RemoverWhitelistParams): Promise<LiberarResponse> {
     const url = `${this.baseUrl}/whitelists/liberar`;
+
+    return del<LiberarResponse>(url, this.apiKey, {
+      guild_id: this.guildId,
+      wl_id: params.wl_id,
+    });
+  }
+
+  /**
+   * Bane um jogador.
+   * Requer `wl_id`. `reason` é opcional.
+   */
+  async ban(params: BanParams): Promise<LiberarResponse> {
+    const url = `${this.baseUrl}/whitelists/ban`;
+
+    return post<LiberarResponse>(url, this.apiKey, {
+      guild_id: this.guildId,
+      wl_id: params.wl_id,
+      reason: params.reason,
+    });
+  }
+
+  /**
+   * Desbane um jogador.
+   * Requer `wl_id`.
+   */
+  async desban(params: DesbanParams): Promise<LiberarResponse> {
+    const url = `${this.baseUrl}/whitelists/ban`;
 
     return del<LiberarResponse>(url, this.apiKey, {
       guild_id: this.guildId,
