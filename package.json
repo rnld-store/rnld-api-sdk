@@ -1,0 +1,36 @@
+{
+  "name": "rnld-api-sdk",
+  "version": "1.0.0",
+  "description": "SDK oficial para integração com a RNLD API — whitelist e query de jogadores",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "rnld",
+    "fivem",
+    "whitelist",
+    "discord",
+    "bot",
+    "sdk"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  }
+}
