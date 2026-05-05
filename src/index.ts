@@ -1,5 +1,6 @@
 export { RnldClient } from './RnldClient.js';
 export { WhitelistClient } from './WhitelistClient.js';
+export { EventsClient } from './EventsClient.js';
 export { RnldApiError, RnldNotFoundError, RnldUnauthorizedError } from './errors.js';
 export type {
   RnldClientOptions,
@@ -13,3 +14,17 @@ export type {
   BanParams,
   DesbanParams,
 } from './types.js';
+export type {
+  BanEvent,
+  TempBanEvent,
+  UnbanEvent,
+  NicknameFailedEvent,
+  NicknameFailedMemberEvent,
+  NicknameFailedDiscordEvent,
+  UpdateNicknameEvent,
+  UpdateRolesEvent,
+  LiberationEvent,
+  BridgeMessageEvent,
+  BridgeAttachment,
+  RnldEventMap,
+} from './events/types.js';

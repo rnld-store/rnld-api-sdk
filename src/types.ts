@@ -3,6 +3,8 @@ export interface RnldClientOptions {
   apiKey: string;
   /** ID da guild Discord do servidor */
   guildId: string;
+  /** URL do rnld-bots-websocket (ex: ws://localhost:8080/ws). Necessário para client.events */
+  wsUrl?: string;
 }
 
 // ---------- Query ----------
