@@ -13,7 +13,6 @@ export class WhitelistClient {
     private readonly apiKey: string,
     private readonly guildId: string,
     private readonly baseUrl: string,
-    private readonly querierUrl: string,
   ) {}
 
   /**
@@ -24,7 +23,7 @@ export class WhitelistClient {
    * Lança `RnldApiError` para outros erros.
    */
   async query(params: QueryWhitelistParams): Promise<QueryWhitelistResponse | null> {
-    const url = `${this.querierUrl}/whitelists/query`;
+    const url = `${this.baseUrl}/whitelists/query`;
 
     try {
       return await post<QueryWhitelistResponse>(url, this.apiKey, {

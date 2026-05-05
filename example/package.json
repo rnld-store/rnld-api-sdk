@@ -1,0 +1,13 @@
+{
+  "name": "rnld-bot-example",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "@ronaldmiranda/api-sdk": "^1.0.0",
+    "discord.js": "^14.0.0",
+    "dotenv": "^16.0.0"
+  }
+}

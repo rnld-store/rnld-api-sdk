@@ -1,5 +1,8 @@
 {
-  "name": "rnld-api-sdk",
+  "name": "@ronaldmiranda/api-sdk",
+  "publishConfig": {
+    "access": "public"
+  },
   "version": "1.0.0",
   "description": "SDK oficial para integração com a RNLD API — whitelist e query de jogadores",
   "main": "dist/index.js",

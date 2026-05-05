@@ -4,17 +4,11 @@ import type { RnldClientOptions } from './types.js';
 export class RnldClient {
   readonly whitelist: WhitelistClient;
 
+  private static readonly BASE_URL = 'https://api.rnld.dev';
+
   constructor(options: RnldClientOptions) {
-    const { apiKey, guildId, baseUrl, querierUrl } = options;
+    const { apiKey, guildId } = options;
 
-    const normalizedBase = baseUrl.replace(/\/$/, '');
-    const normalizedQuerier = (querierUrl ?? baseUrl).replace(/\/$/, '');
-
-    this.whitelist = new WhitelistClient(
-      apiKey,
-      guildId,
-      normalizedBase,
-      normalizedQuerier,
-    );
+    this.whitelist = new WhitelistClient(apiKey, guildId, RnldClient.BASE_URL);
   }
 }

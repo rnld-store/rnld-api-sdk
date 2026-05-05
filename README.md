@@ -1,24 +1,21 @@
-# rnld-api-sdk
+# @ronaldmiranda/api-sdk
 
 SDK oficial para integração com a **RNLD API** — permite que criadores de bots Discord consultem e gerenciem whitelists de servidores FiveM.
 
 ## Instalação
 
 ```bash
-npm install rnld-api-sdk
+npm install @ronaldmiranda/api-sdk
 ```
 
 ## Início rápido
 
 ```ts
-import { RnldClient } from 'rnld-api-sdk';
+import { RnldClient } from '@ronaldmiranda/api-sdk';
 
 const client = new RnldClient({
   apiKey: 'SUA_API_KEY',
   guildId: 'ID_DA_GUILD',
-  baseUrl: 'https://api.seuservidor.com',
-  // querierUrl é opcional; se omitido usa o mesmo baseUrl
-  // querierUrl: 'https://querier.seuservidor.com',
 });
 ```
 
@@ -82,7 +79,7 @@ const resultado = await client.whitelist.remover({ wl_id: 'TOKEN_DO_JOGADOR' });
 ## Tratamento de erros
 
 ```ts
-import { RnldApiError, RnldNotFoundError, RnldUnauthorizedError } from 'rnld-api-sdk';
+import { RnldApiError, RnldNotFoundError, RnldUnauthorizedError } from '@ronaldmiranda/api-sdk';
 
 try {
   await client.whitelist.liberar({ wl_id: 'TOKEN' });
@@ -106,10 +103,27 @@ try {
 
 | Opção        | Tipo   | Obrigatório | Descrição                                                       |
 |--------------|--------|-------------|------------------------------------------------------------------|
-| `apiKey`     | string | sim         | API Key do servidor (header `x-api-key`)                        |
-| `guildId`    | string | sim         | ID da guild Discord                                              |
-| `baseUrl`    | string | sim         | URL base da RNLD API principal                                   |
-| `querierUrl` | string | não         | URL do serviço de queries; usa `baseUrl` se não informado        |
+| `apiKey`  | string | sim | API Key do servidor (header `x-api-key`) |
+| `guildId` | string | sim | ID da guild Discord                      |
+
+## Exemplo — bot Discord
+
+Veja um bot completo com `discord.js` em [`example/bot.js`](./example/bot.js).
+
+```bash
+cd example
+cp .env.example .env   # preencha as variáveis
+npm install
+npm start
+```
+
+Comandos registrados automaticamente na guild:
+
+| Comando | Descrição |
+|---|---|
+| `/wl-status` | Consulta whitelist por `discord_id` ou `wl_id` |
+| `/wl-liberar` | Libera a whitelist de um jogador |
+| `/wl-remover` | Remove a whitelist de um jogador |
 
 ## Build
 

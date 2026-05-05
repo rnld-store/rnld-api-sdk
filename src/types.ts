@@ -3,13 +3,6 @@ export interface RnldClientOptions {
   apiKey: string;
   /** ID da guild Discord do servidor */
   guildId: string;
-  /** URL base da RNLD API principal (para /whitelists/liberar e demais rotas) */
-  baseUrl: string;
-  /**
-   * URL do serviço de queries (rnld-api-manager-querier).
-   * Se omitido, usa o mesmo `baseUrl`.
-   */
-  querierUrl?: string;
 }
 
 // ---------- Query ----------
