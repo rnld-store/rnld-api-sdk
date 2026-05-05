@@ -5,6 +5,7 @@ import { RnldClient, RnldApiError } from '@ronaldmiranda/api-sdk';
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 const RNLD_API_KEY = process.env.RNLD_API_KEY;
 const GUILD_ID = process.env.GUILD_ID;
+const WS_URL = process.env.WS_URL; // opcional — usa wss://ws.rnld.dev/ws por padrão
 
 if (!DISCORD_TOKEN || !RNLD_API_KEY || !GUILD_ID) {
   console.error('Defina DISCORD_TOKEN, RNLD_API_KEY e GUILD_ID no .env');
@@ -16,6 +17,7 @@ if (!DISCORD_TOKEN || !RNLD_API_KEY || !GUILD_ID) {
 const rnld = new RnldClient({
   apiKey: RNLD_API_KEY,
   guildId: GUILD_ID,
+  wsUrl: WS_URL,
 });
 
 // ---------- Comandos ----------
@@ -90,6 +92,63 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 client.once('ready', async () => {
   console.log(`[BOT] Online como ${client.user.tag}`);
   await registrarComandos(client.user.id);
+  rnld.events.connect();
+});
+
+// ---------- Eventos em tempo real (rnld-bots-websocket) ----------
+
+rnld.events.on('connected', () => {
+  console.log('[WS] Conectado ao rnld-bots-websocket');
+});
+
+rnld.events.on('disconnected', () => {
+  console.log('[WS] Desconectado — reconectando...');
+});
+
+rnld.events.on('error', (err) => {
+  console.error('[WS] Erro:', err.message);
+});
+
+rnld.events.on('ban', async (evento) => {
+  console.log(`[BAN] ${evento.discord_id} — ${evento.reason}`);
+
+  const guild = client.guilds.cache.get(GUILD_ID);
+  const logChannel = guild?.channels.cache.find(c => c.name === 'logs-ban');
+  if (logChannel?.isTextBased()) {
+    await logChannel.send(`🔨 <@${evento.discord_id}> foi banido: **${evento.reason}**`);
+  }
+});
+
+rnld.events.on('tempban', async (evento) => {
+  console.log(`[TEMPBAN] ${evento.discord_id} até ${evento.expires_at}`);
+});
+
+rnld.events.on('unban', async (evento) => {
+  const motivo = evento.subtype === 'auto_expired' ? 'tempban expirado' : evento.reason;
+  console.log(`[UNBAN] ${evento.discord_id} — ${motivo}`);
+});
+
+rnld.events.on('liberation', async (evento) => {
+  console.log(`[LIBERATION] ${evento.discord_id} liberado (${evento.wl_id})`);
+
+  const guild = client.guilds.cache.get(GUILD_ID);
+  const logChannel = guild?.channels.cache.find(c => c.name === 'logs-whitelist');
+  if (logChannel?.isTextBased()) {
+    await logChannel.send(`✅ <@${evento.discord_id}> foi liberado — token: \`${evento.wl_id}\``);
+  }
+});
+
+rnld.events.on('updateNickname', (evento) => {
+  console.log(`[NICKNAME] ${evento.discord_id} → ${evento.new_nickname}`);
+});
+
+rnld.events.on('nicknameFailed', (evento) => {
+  console.warn(`[NICKNAME FALHOU] motivo: ${evento.reason}`);
+  console.warn(`[NICKNAME FALHOU] event: ${JSON.stringify(evento)}`);
+});
+
+rnld.events.on('updateRoles', (evento) => {
+  console.log(`[ROLES] ${evento.discord_id} +[${evento.roles_add}] -[${evento.roles_remove}]`);
 });
 
 client.on('interactionCreate', async (interaction) => {
@@ -156,7 +215,7 @@ client.on('interactionCreate', async (interaction) => {
     }
 
     if (commandName === 'wl-ban') {
-      const wlId   = interaction.options.getString('wl_id');
+      const wlId = interaction.options.getString('wl_id');
       const reason = interaction.options.getString('reason');
       const resultado = await rnld.whitelist.ban({ wl_id: wlId, reason });
 
