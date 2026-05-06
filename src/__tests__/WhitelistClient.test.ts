@@ -555,7 +555,7 @@ describe('WhitelistClient.atualizaToken', () => {
     client = new WhitelistClient(API_KEY, GUILD_ID, BASE_URL);
   });
 
-  it('envia POST com guild_id, wl_id e identificadores informados', async () => {
+  it('envia PATCH com guild_id, wl_id e identificadores informados', async () => {
     const fetchMock = mockFetch(200, {
       status: true,
       mensagem: 'Token atualizado com sucesso.',
@@ -572,7 +572,7 @@ describe('WhitelistClient.atualizaToken', () => {
 
     const [calledUrl, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(calledUrl).toBe(`${BASE_URL}/whitelists/update`);
-    expect(init.method).toBe('POST');
+    expect(init.method).toBe('PATCH');
     expect(init.body).toBe(
       JSON.stringify({
         guild_id: GUILD_ID,
