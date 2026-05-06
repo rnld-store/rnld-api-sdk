@@ -212,7 +212,7 @@ export class WhitelistClient {
       );
     }
 
-    return post<AtualizaTokenResponse>(url, this.apiKey, {
+    return patch<AtualizaTokenResponse>(url, this.apiKey, {
       guild_id: this.guildId,
       wl_id: params.wl_id,
       discordId: params.discordId,
