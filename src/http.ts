@@ -33,6 +33,7 @@ export async function post<T>(
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': apiKey,
+      'x-source': "bot-sdk-js",
     },
     body: JSON.stringify(body),
   });
