@@ -667,3 +667,134 @@ describe('WhitelistClient.msgCommand', () => {
     );
   });
 });
+
+describe('WhitelistClient.listarStaffIds', () => {
+  let client: WhitelistClient;
+
+  beforeEach(() => {
+    client = new WhitelistClient(API_KEY, GUILD_ID, BASE_URL);
+  });
+
+  it('faz GET em /whitelists/staff/ids com guild_id e retorna a lista', async () => {
+    const fetchMock = mockFetch(200, {
+      status: true,
+      code: 200,
+      total: 2,
+      cached: false,
+      data: ['111', '222'],
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await client.listarStaffIds();
+
+    expect(result.total).toBe(2);
+    expect(result.data).toEqual(['111', '222']);
+
+    const [calledUrl, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const parsed = new URL(calledUrl);
+    expect(parsed.pathname).toBe('/whitelists/staff/ids');
+    expect(parsed.searchParams.get('guild_id')).toBe(GUILD_ID);
+    expect(init.method).toBe('GET');
+  });
+
+  it('lança RnldUnauthorizedError em 403', async () => {
+    vi.stubGlobal('fetch', mockFetch(403, { mensagem: 'Acesso negado' }));
+    await expect(client.listarStaffIds()).rejects.toBeInstanceOf(RnldUnauthorizedError);
+  });
+});
+
+describe('WhitelistClient.listarStaff', () => {
+  let client: WhitelistClient;
+
+  beforeEach(() => {
+    client = new WhitelistClient(API_KEY, GUILD_ID, BASE_URL);
+  });
+
+  it('faz GET paginado em /whitelists/staff/list com page e limit', async () => {
+    const fetchMock = mockFetch(200, {
+      status: true,
+      code: 200,
+      cached: true,
+      pagination: { page: 2, limit: 10, total: 25, totalPages: 3 },
+      data: [{ wl_id: 'WPLP', discord_id: '111', whitelisted: true, banned: false }],
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await client.listarStaff({ page: 2, limit: 10 });
+
+    expect(result.pagination.page).toBe(2);
+    expect(result.data[0].discord_id).toBe('111');
+
+    const [calledUrl, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const parsed = new URL(calledUrl);
+    expect(parsed.pathname).toBe('/whitelists/staff/list');
+    expect(parsed.searchParams.get('guild_id')).toBe(GUILD_ID);
+    expect(parsed.searchParams.get('page')).toBe('2');
+    expect(parsed.searchParams.get('limit')).toBe('10');
+    expect(init.method).toBe('GET');
+  });
+
+  it('omite page/limit da querystring quando não informados', async () => {
+    const fetchMock = mockFetch(200, {
+      status: true,
+      code: 200,
+      cached: false,
+      pagination: { page: 1, limit: 50, total: 0, totalPages: 1 },
+      data: [],
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await client.listarStaff();
+
+    const [calledUrl] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const parsed = new URL(calledUrl);
+    expect(parsed.searchParams.has('page')).toBe(false);
+    expect(parsed.searchParams.has('limit')).toBe(false);
+  });
+});
+
+describe('WhitelistClient.condicaoStaff', () => {
+  let client: WhitelistClient;
+
+  beforeEach(() => {
+    client = new WhitelistClient(API_KEY, GUILD_ID, BASE_URL);
+  });
+
+  it('faz GET em /whitelists/staff/condition com discord_id', async () => {
+    const fetchMock = mockFetch(200, {
+      status: true,
+      code: 200,
+      cached: false,
+      data: { discord_id: '111', isStaff: true, wl_id: 'WPLP', whitelisted: true, banned: false },
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await client.condicaoStaff({ discordId: '111' });
+
+    expect(result.data.isStaff).toBe(true);
+    expect(result.data.wl_id).toBe('WPLP');
+
+    const [calledUrl, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const parsed = new URL(calledUrl);
+    expect(parsed.pathname).toBe('/whitelists/staff/condition');
+    expect(parsed.searchParams.get('guild_id')).toBe(GUILD_ID);
+    expect(parsed.searchParams.get('discord_id')).toBe('111');
+    expect(init.method).toBe('GET');
+  });
+
+  it('retorna isStaff=false para um discord_id que não é staff', async () => {
+    vi.stubGlobal(
+      'fetch',
+      mockFetch(200, {
+        status: true,
+        code: 200,
+        cached: true,
+        data: { discord_id: '999', isStaff: false, wl_id: null, whitelisted: null, banned: null },
+      }),
+    );
+
+    const result = await client.condicaoStaff({ discordId: '999' });
+    expect(result.data.isStaff).toBe(false);
+    expect(result.data.wl_id).toBeNull();
+  });
+});

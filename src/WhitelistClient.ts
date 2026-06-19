@@ -16,6 +16,11 @@ import type {
   StaffParams,
   DestaffParams,
   StaffResponse,
+  StaffIdsResponse,
+  StaffListParams,
+  StaffListResponse,
+  StaffConditionParams,
+  StaffConditionResponse,
   TempbanParams,
   TempbanResponse,
   PrecadastroParams,
@@ -157,6 +162,48 @@ export class WhitelistClient {
     return del<StaffResponse>(url, this.apiKey, {
       guild_id: this.guildId,
       wl_id: params.wl_id,
+    });
+  }
+
+  /**
+   * Lista todos os discord_ids com condição de staff na guild.
+   *
+   * A primeira consulta é quente (MySQL) e popula o cache Redis; as demais
+   * são servidas do cache até uma mutação de staff invalidá-lo. O campo
+   * `cached` da resposta indica a origem.
+   */
+  async listarStaffIds(): Promise<StaffIdsResponse> {
+    const url = `${this.baseUrl}/whitelists/staff/ids`;
+
+    return get<StaffIdsResponse>(url, this.apiKey, {
+      guild_id: this.guildId,
+    });
+  }
+
+  /**
+   * Lista, de forma paginada, as informações de staff da guild.
+   * `page` (default 1) e `limit` (default 50, máx 200) são opcionais.
+   */
+  async listarStaff(params: StaffListParams = {}): Promise<StaffListResponse> {
+    const url = `${this.baseUrl}/whitelists/staff/list`;
+
+    return get<StaffListResponse>(url, this.apiKey, {
+      guild_id: this.guildId,
+      page: params.page,
+      limit: params.limit,
+    });
+  }
+
+  /**
+   * Consulta a condição de staff de um único discord_id.
+   * Retorna sempre uma resposta (isStaff = false quando o id não é staff).
+   */
+  async condicaoStaff(params: StaffConditionParams): Promise<StaffConditionResponse> {
+    const url = `${this.baseUrl}/whitelists/staff/condition`;
+
+    return get<StaffConditionResponse>(url, this.apiKey, {
+      guild_id: this.guildId,
+      discord_id: params.discordId,
     });
   }
 

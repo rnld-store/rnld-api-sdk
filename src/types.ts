@@ -162,6 +162,77 @@ export interface DestaffParams {
 
 export type StaffResponse = DefaultResponse;
 
+// ---------- Staff (leitura) ----------
+
+export interface StaffMember {
+  /** Token amigável do jogador */
+  wl_id: string;
+  /** Discord ID do staff */
+  discord_id: string;
+  /** Se o jogador está com whitelist ativa */
+  whitelisted: boolean;
+  /** Se o jogador está banido */
+  banned: boolean;
+}
+
+export interface StaffIdsResponse {
+  status: boolean;
+  code: number;
+  /** Quantidade de discord_ids retornados */
+  total: number;
+  /** true = servido do cache Redis; false = consulta quente ao MySQL */
+  cached: boolean;
+  /** discord_ids com condição de staff */
+  data: string[];
+}
+
+export interface StaffListParams {
+  /** Página (default 1) */
+  page?: number;
+  /** Itens por página (default 50, máx 200) */
+  limit?: number;
+}
+
+export interface StaffPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface StaffListResponse {
+  status: boolean;
+  code: number;
+  /** true = servido do cache Redis; false = consulta quente ao MySQL */
+  cached: boolean;
+  pagination: StaffPagination;
+  data: StaffMember[];
+}
+
+export interface StaffConditionParams {
+  /** Discord ID a consultar */
+  discordId: string;
+}
+
+export interface StaffConditionData {
+  discord_id: string;
+  isStaff: boolean;
+  /** Token amigável quando é staff; null caso contrário */
+  wl_id: string | null;
+  /** null quando o discord_id não é staff */
+  whitelisted: boolean | null;
+  /** null quando o discord_id não é staff */
+  banned: boolean | null;
+}
+
+export interface StaffConditionResponse {
+  status: boolean;
+  code: number;
+  /** true = servido do cache Redis; false = consulta quente ao MySQL */
+  cached: boolean;
+  data: StaffConditionData;
+}
+
 export interface TempbanParams {
   /** Token amigável do jogador */
   wl_id: string;

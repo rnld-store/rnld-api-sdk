@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.4] - 2026-06-19
+### Added
+- `whitelist.listarStaffIds()` — lista todos os discord_ids com condição de staff
+- `whitelist.listarStaff(params?)` — informações de staff paginadas (`page`/`limit`)
+- `whitelist.condicaoStaff(params)` — condição de staff de um único discord_id
+- Tipos: `StaffMember`, `StaffIdsResponse`, `StaffListParams`, `StaffPagination`, `StaffListResponse`, `StaffConditionParams`, `StaffConditionData`, `StaffConditionResponse`
+
 ## [1.1.1] - 2026-05-05
 ### Fixed
 - Documentação atualizada com ban/desban

@@ -110,6 +110,56 @@ console.log(resultado.mensagem);
 
 ---
 
+### `whitelist.listarStaffIds()` — todos os discord_ids de staff
+
+Retorna todos os `discord_id` com condição de staff na guild.
+
+```ts
+const { total, cached, data } = await client.whitelist.listarStaffIds();
+
+console.log(total);   // 2
+console.log(cached);  // false na 1ª chamada, true nas seguintes
+console.log(data);    // ['111...', '222...']
+```
+
+---
+
+### `whitelist.listarStaff(params?)` — informações de staff paginadas
+
+Lista, de forma paginada, as informações de staff (mesmo conjunto cacheado).
+
+```ts
+const resultado = await client.whitelist.listarStaff({ page: 1, limit: 50 });
+
+console.log(resultado.pagination); // { page, limit, total, totalPages }
+console.log(resultado.data);       // [{ wl_id, discord_id, whitelisted, banned }]
+```
+
+| Campo   | Tipo   | Obrigatório | Descrição                          |
+|---------|--------|-------------|------------------------------------|
+| `page`  | number | não         | Página (default 1)                 |
+| `limit` | number | não         | Itens por página (default 50, máx 200) |
+
+---
+
+### `whitelist.condicaoStaff(params)` — condição de staff de um discord_id
+
+Consulta se um único `discord_id` é staff. Retorna sempre uma resposta
+(`isStaff: false` quando não é staff).
+
+```ts
+const { data } = await client.whitelist.condicaoStaff({ discordId: '148073845960605698' });
+
+console.log(data.isStaff);  // true | false
+console.log(data.wl_id);    // token amigável quando é staff, senão null
+```
+
+| Campo       | Tipo   | Obrigatório | Descrição                |
+|-------------|--------|-------------|--------------------------|
+| `discordId` | string | sim         | Discord ID a consultar   |
+
+---
+
 ## Tratamento de erros
 
 ```ts
