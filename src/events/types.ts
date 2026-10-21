@@ -30,6 +30,31 @@ export interface UnbanEvent {
   ts: string;
 }
 
+/** Alvo de um desbanimento em massa (só players com discord_id). */
+export interface UnbanBulkPlayer {
+  discord_id: string;
+  wl_id: string;
+  /** 1 se o player é whitelistado (define qual cargo de cidadão devolver) */
+  whitelisted: 0 | 1;
+}
+
+/**
+ * Lote de desbanimento em massa. Um lote pode vir em vários chunks
+ * (mesmo `batch_id`, `chunk` 1..`chunks`) para limitar o tamanho da mensagem.
+ * Substitui os eventos `unban` individuais nesse fluxo.
+ */
+export interface UnbanBulkEvent {
+  type: 'unban_bulk';
+  guild_id: string;
+  batch_id: string;
+  chunk: number;
+  chunks: number;
+  /** Total de banimentos removidos no lote (inclui players sem discord_id) */
+  total: number;
+  players: UnbanBulkPlayer[];
+  ts: string;
+}
+
 // ── rnld_nickname_events ─────────────────────────────────────────────────────
 
 export interface NicknameFailedMemberEvent {
@@ -112,6 +137,7 @@ export interface RnldEventMap {
   ban: [BanEvent];
   tempban: [TempBanEvent];
   unban: [UnbanEvent];
+  unban_bulk: [UnbanBulkEvent];
   nicknameFailed: [NicknameFailedEvent];
   updateNickname: [UpdateNicknameEvent];
   updateRoles: [UpdateRolesEvent];

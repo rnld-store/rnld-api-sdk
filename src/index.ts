@@ -51,6 +51,8 @@ export type {
   BanEvent,
   TempBanEvent,
   UnbanEvent,
+  UnbanBulkEvent,
+  UnbanBulkPlayer,
   NicknameFailedEvent,
   NicknameFailedMemberEvent,
   NicknameFailedDiscordEvent,

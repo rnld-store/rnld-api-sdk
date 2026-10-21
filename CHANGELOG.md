@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.5.0] - 2026-10-21
+### Added
+- Evento `unban_bulk` (desbanimento em massa, em chunks por `batch_id`) e tipos `UnbanBulkEvent`/`UnbanBulkPlayer`
+
 ## [1.4.4] - 2026-06-19
 ### Added
 - `whitelist.listarStaffIds()` — lista todos os discord_ids com condição de staff
