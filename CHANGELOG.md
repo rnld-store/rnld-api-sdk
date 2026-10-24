@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.6.0] - 2026-10-24
+### Added
+- Evento `guild_wipe` (wipe de uma guild via `POST /mngr/wipeguild`) com `players_removed`, `total_removed` e `deleted` por tabela; tipo `GuildWipeEvent`
+
 ## [1.5.0] - 2026-10-21
 ### Added
 - Evento `unban_bulk` (desbanimento em massa, em chunks por `batch_id`) e tipos `UnbanBulkEvent`/`UnbanBulkPlayer`

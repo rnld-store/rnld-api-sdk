@@ -55,6 +55,24 @@ export interface UnbanBulkEvent {
   ts: string;
 }
 
+/**
+ * Wipe de uma guild (`POST /mngr/wipeguild`): os dados dos players foram apagados
+ * em todas as tabelas com `guild_id` (a config/api_key da guild é preservada).
+ */
+export interface GuildWipeEvent {
+  type: 'guild_wipe';
+  guild_id: string;
+  /** Sempre null: o wipe não é sobre um player específico */
+  wl_id: null;
+  /** Players removidos (linhas de `players`) */
+  players_removed: number;
+  /** Soma de todas as linhas removidas, em todas as tabelas */
+  total_removed: number;
+  /** Linhas removidas por tabela (ex.: `{ players: 842, player_tokens: 2100 }`) */
+  deleted: Record<string, number>;
+  ts: string;
+}
+
 // ── rnld_nickname_events ─────────────────────────────────────────────────────
 
 export interface NicknameFailedMemberEvent {
@@ -138,6 +156,7 @@ export interface RnldEventMap {
   tempban: [TempBanEvent];
   unban: [UnbanEvent];
   unban_bulk: [UnbanBulkEvent];
+  guild_wipe: [GuildWipeEvent];
   nicknameFailed: [NicknameFailedEvent];
   updateNickname: [UpdateNicknameEvent];
   updateRoles: [UpdateRolesEvent];

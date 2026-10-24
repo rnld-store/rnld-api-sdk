@@ -52,6 +52,7 @@ export type {
   TempBanEvent,
   UnbanEvent,
   UnbanBulkEvent,
+  GuildWipeEvent,
   UnbanBulkPlayer,
   NicknameFailedEvent,
   NicknameFailedMemberEvent,
