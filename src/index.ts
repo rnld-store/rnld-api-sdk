@@ -1,6 +1,7 @@
 export { RnldClient } from './RnldClient.js';
 export { WhitelistClient } from './WhitelistClient.js';
 export { EventsClient } from './EventsClient.js';
+export { MultiEventsClient } from './MultiEventsClient.js';
 export { RnldApiError, RnldNotFoundError, RnldUnauthorizedError } from './errors.js';
 export type {
   RnldClientOptions,

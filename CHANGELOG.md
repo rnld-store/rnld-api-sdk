@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.7.0] - 2026-11-01
+### Added
+- `MultiEventsClient` — uma única conexão WebSocket (`/ws/multi`) para várias guilds: `subscribe(apiKeys)` / `unsubscribe(apiKeys)` (lotes de 100), reassinatura automática após reconexão e eventos `subscribed` / `unsubscribed` / `subscribeError`. Os demais eventos são os mesmos do `EventsClient` e já trazem `guild_id`. Requer `rnld-bots-websocket` com o endpoint `/ws/multi`.
+### Changed
+- `EventsClient`: reconexão com jitter (50–100% do delay) para evitar reconexões sincronizadas após queda do servidor.
+
 ## [1.6.0] - 2026-10-24
 ### Added
 - Evento `guild_wipe` (wipe de uma guild via `POST /mngr/wipeguild`) com `players_removed`, `total_removed` e `deleted` por tabela; tipo `GuildWipeEvent`

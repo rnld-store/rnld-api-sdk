@@ -8,17 +8,17 @@ const MIN_RECONNECT_MS = 1_000;
 const MAX_RECONNECT_MS = 30_000;
 
 /** Envelope enviado pelo rnld-bots-websocket */
-interface WsEnvelope {
+export interface WsEnvelope {
   channel: string;
   payload: Record<string, unknown>;
 }
 
 export class EventsClient extends EventEmitter {
-  private readonly apiKey: string;
-  private readonly wsUrl: string;
-  private ws: WebSocket | null = null;
-  private reconnectDelay = MIN_RECONNECT_MS;
-  private destroyed = false;
+  protected readonly apiKey: string;
+  protected readonly wsUrl: string;
+  protected ws: WebSocket | null = null;
+  protected reconnectDelay = MIN_RECONNECT_MS;
+  protected destroyed = false;
 
   constructor(apiKey: string, wsUrl: string) {
     super();
@@ -68,15 +68,24 @@ export class EventsClient extends EventEmitter {
     this.ws = null;
   }
 
+  /** Abre o socket. Subclasses sobrescrevem para mudar a autenticação do handshake. */
+  protected createSocket(): WebSocket {
+    return new WebSocket(this.wsUrl, { headers: { 'x-api-key': this.apiKey } });
+  }
+
+  /** Chamado após cada `open` (inclusive reconexões), depois de emitir `connected`. */
+  protected onOpen(): void {}
+
   private _connect(): void {
     if (this.destroyed) return;
 
-    const ws = new WebSocket(this.wsUrl, { headers: { 'x-api-key': this.apiKey } });
+    const ws = this.createSocket();
     this.ws = ws;
 
     ws.on('open', () => {
       this.reconnectDelay = MIN_RECONNECT_MS;
       this.emit('connected');
+      this.onOpen();
     });
 
     ws.on('message', (data) => {
@@ -101,11 +110,14 @@ export class EventsClient extends EventEmitter {
   }
 
   private _scheduleReconnect(): void {
-    setTimeout(() => this._connect(), this.reconnectDelay);
+    // jitter (50–100% do delay): evita que muitos clientes reconectem em sincronia
+    // quando o servidor reinicia.
+    const delay = this.reconnectDelay * (0.5 + Math.random() * 0.5);
+    setTimeout(() => this._connect(), delay);
     this.reconnectDelay = Math.min(this.reconnectDelay * 2, MAX_RECONNECT_MS);
   }
 
-  private _dispatch(envelope: WsEnvelope): void {
+  protected _dispatch(envelope: WsEnvelope): void {
     const { channel, payload } = envelope;
 
     if (channel === CHANNEL_LIBERATION) {
