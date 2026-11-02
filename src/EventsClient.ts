@@ -76,6 +76,14 @@ export class EventsClient extends EventEmitter {
   /** Chamado após cada `open` (inclusive reconexões), depois de emitir `connected`. */
   protected onOpen(): void {}
 
+  /**
+   * Chamado quando o socket fecha (sem `destroy()`), com o close code do
+   * servidor. Retornar `false` suspende a reconexão automática.
+   */
+  protected shouldReconnect(_code: number, _reason: string): boolean {
+    return true;
+  }
+
   private _connect(): void {
     if (this.destroyed) return;
 
@@ -97,10 +105,10 @@ export class EventsClient extends EventEmitter {
       }
     });
 
-    ws.on('close', () => {
+    ws.on('close', (code, reason) => {
       if (!this.destroyed) {
         this.emit('disconnected');
-        this._scheduleReconnect();
+        if (this.shouldReconnect(code, reason.toString())) this._scheduleReconnect();
       }
     });
 

@@ -4,6 +4,14 @@ import { EventsClient, type WsEnvelope } from './EventsClient.js';
 /** Mesmo limite por mensagem que o rnld-bots-websocket aceita em /ws/multi. */
 const MAX_KEYS_PER_MESSAGE = 100;
 
+/**
+ * Close code: a conexão ficou sem nenhuma guild assinada (nunca assinou, só
+ * mandou keys inválidas ou removeu todas). Mesmo valor do rnld-bots-websocket.
+ */
+export const CLOSE_NO_SUBSCRIPTIONS = 4001;
+/** Close code: excesso de api_keys inválidas na mesma conexão. */
+export const CLOSE_TOO_MANY_INVALID_KEYS = 4002;
+
 /** Resposta de controle do servidor (tem `op` em vez de `channel`). */
 interface ControlReply {
   op: 'subscribed' | 'unsubscribed' | 'error';
@@ -24,10 +32,19 @@ interface ControlReply {
  * - `subscribed` `(guildId: string)` — o servidor confirmou a assinatura
  * - `unsubscribed` `(guildId: string)`
  * - `subscribeError` `(reason: string, apiKeyHint?: string, guildId?: string)` —
- *   ex.: `invalid_key`, `limit_exceeded`
+ *   ex.: `invalid_key`, `limit_exceeded`, `unavailable` (banco do servidor
+ *   indisponível; tente de novo) e `too_many_invalid_keys` (o servidor fechou a
+ *   conexão por excesso de keys inválidas; o cliente reconecta com backoff)
+ *
+ * O servidor fecha conexões sem nenhuma guild assinada. Se isso acontecer com
+ * o cliente sem keys, a reconexão fica suspensa até o próximo `subscribe()`.
+ * Remova (`unsubscribe`) keys que voltarem `invalid_key`: elas são reenviadas a
+ * cada reconexão.
  */
 export class MultiEventsClient extends EventsClient {
   private readonly keys = new Set<string>();
+  /** Reconexão suspensa: o servidor fechou por falta de assinatura e não há keys. */
+  private paused = false;
 
   constructor(wsUrl: string) {
     super('', wsUrl);
@@ -37,6 +54,11 @@ export class MultiEventsClient extends EventsClient {
   subscribe(apiKeys: string | string[]): this {
     const list = toArray(apiKeys);
     for (const k of list) this.keys.add(k);
+    if (this.paused && this.keys.size > 0 && !this.destroyed) {
+      this.paused = false;
+      this.connect(); // o onOpen envia todas as keys
+      return this;
+    }
     this.send('subscribe', list);
     return this;
   }
@@ -52,6 +74,22 @@ export class MultiEventsClient extends EventsClient {
   protected override createSocket(): WebSocket {
     // a autenticação é por mensagem (subscribe), não por header
     return new WebSocket(this.wsUrl);
+  }
+
+  override connect(): this {
+    this.paused = false;
+    return super.connect();
+  }
+
+  protected override shouldReconnect(code: number): boolean {
+    if (code === CLOSE_TOO_MANY_INVALID_KEYS) {
+      this.emit('subscribeError', 'too_many_invalid_keys', undefined, undefined);
+    }
+    if (code === CLOSE_NO_SUBSCRIPTIONS && this.keys.size === 0) {
+      this.paused = true;
+      return false;
+    }
+    return true;
   }
 
   protected override onOpen(): void {

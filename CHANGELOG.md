@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.8.0] - 2026-11-02
+### Added
+- `MultiEventsClient`: tratamento dos close codes do `rnld-bots-websocket` em `/ws/multi`, exportados como `CLOSE_NO_SUBSCRIPTIONS` (4001) e `CLOSE_TOO_MANY_INVALID_KEYS` (4002).
+  - 4001 (conexão sem nenhuma guild assinada): sem keys, a reconexão fica suspensa até o próximo `subscribe()`; com keys, reconecta normalmente.
+  - 4002 (excesso de keys inválidas): emite `subscribeError` com `too_many_invalid_keys` e reconecta com backoff.
+- `subscribeError` pode trazer `unavailable` (banco do servidor indisponível).
+### Changed
+- `EventsClient`: hook protegido `shouldReconnect(code, reason)` para subclasses decidirem a reconexão a partir do close code.
+
 ## [1.7.0] - 2026-11-01
 ### Added
 - `MultiEventsClient` — uma única conexão WebSocket (`/ws/multi`) para várias guilds: `subscribe(apiKeys)` / `unsubscribe(apiKeys)` (lotes de 100), reassinatura automática após reconexão e eventos `subscribed` / `unsubscribed` / `subscribeError`. Os demais eventos são os mesmos do `EventsClient` e já trazem `guild_id`. Requer `rnld-bots-websocket` com o endpoint `/ws/multi`.

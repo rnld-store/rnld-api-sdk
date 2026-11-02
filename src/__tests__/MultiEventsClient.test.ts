@@ -1,7 +1,11 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { WebSocketServer, type WebSocket as ServerSocket } from 'ws';
 import type { AddressInfo } from 'node:net';
-import { MultiEventsClient } from '../MultiEventsClient.js';
+import {
+  CLOSE_NO_SUBSCRIPTIONS,
+  CLOSE_TOO_MANY_INVALID_KEYS,
+  MultiEventsClient,
+} from '../MultiEventsClient.js';
 
 interface Control {
   op: string;
@@ -129,4 +133,99 @@ describe('MultiEventsClient', () => {
 
     expect(received).toEqual([{ op: 'subscribe', api_keys: ['k2'] }]);
   }, 10_000);
+
+  describe('fechamentos do servidor (contrato com rnld-bots-websocket)', () => {
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    // backoff mínimo é 1s com jitter de 50–100%: 1,5s cobre uma reconexão
+    const RECONNECT_WINDOW_MS = 1_500;
+
+    it('usa os mesmos close codes do servidor', () => {
+      expect(CLOSE_NO_SUBSCRIPTIONS).toBe(4001);
+      expect(CLOSE_TOO_MANY_INVALID_KEYS).toBe(4002);
+    });
+
+    it('sem keys, 4001 suspende a reconexão até o próximo subscribe', async () => {
+      const { url, received, sockets } = await startServer();
+      client = new MultiEventsClient(url).connect();
+      await once(client, 'connected');
+
+      const disconnected = once(client, 'disconnected');
+      sockets[0]!.close(CLOSE_NO_SUBSCRIPTIONS, 'no_subscriptions');
+      await disconnected;
+      await sleep(RECONNECT_WINDOW_MS);
+      expect(sockets).toHaveLength(1); // não entrou em loop de reconexão
+
+      const reconnected = once(client, 'connected');
+      client.subscribe('k1');
+      await reconnected;
+      await sleep(100);
+
+      expect(sockets).toHaveLength(2);
+      expect(received).toEqual([{ op: 'subscribe', api_keys: ['k1'] }]);
+    }, 10_000);
+
+    it('com keys, 4001 reconecta e reassina normalmente', async () => {
+      const { url, received, sockets } = await startServer();
+      client = new MultiEventsClient(url);
+      client.subscribe('bad-1').connect();
+      await once(client, 'connected');
+      await sleep(50);
+      received.length = 0;
+
+      const reconnected = once(client, 'connected');
+      sockets[0]!.close(CLOSE_NO_SUBSCRIPTIONS, 'no_subscriptions');
+      await reconnected;
+      await sleep(100);
+
+      expect(received).toEqual([{ op: 'subscribe', api_keys: ['bad-1'] }]);
+    }, 10_000);
+
+    it('4002 emite subscribeError too_many_invalid_keys e reconecta', async () => {
+      const { url, sockets } = await startServer();
+      client = new MultiEventsClient(url);
+      client.subscribe('k1').connect();
+      await once(client, 'connected');
+
+      const errors: unknown[][] = [];
+      client.on('subscribeError', (...args: unknown[]) => errors.push(args));
+      const reconnected = once(client, 'connected');
+      sockets[0]!.close(CLOSE_TOO_MANY_INVALID_KEYS, 'too_many_invalid_keys');
+      await reconnected;
+
+      expect(errors).toEqual([['too_many_invalid_keys', undefined, undefined]]);
+    }, 10_000);
+
+    it('subscribe após destroy não reabre uma conexão suspensa', async () => {
+      const { url, sockets } = await startServer();
+      client = new MultiEventsClient(url).connect();
+      await once(client, 'connected');
+
+      const disconnected = once(client, 'disconnected');
+      sockets[0]!.close(CLOSE_NO_SUBSCRIPTIONS, 'no_subscriptions');
+      await disconnected;
+      client.destroy();
+      client.subscribe('k1');
+      await sleep(RECONNECT_WINDOW_MS);
+
+      expect(sockets).toHaveLength(1);
+    }, 10_000);
+
+    it('connect() explícito após suspensão não duplica a conexão no subscribe seguinte', async () => {
+      const { url, sockets } = await startServer();
+      client = new MultiEventsClient(url).connect();
+      await once(client, 'connected');
+
+      const disconnected = once(client, 'disconnected');
+      sockets[0]!.close(CLOSE_NO_SUBSCRIPTIONS, 'no_subscriptions');
+      await disconnected;
+
+      const reconnected = once(client, 'connected');
+      client.connect();
+      await reconnected;
+      client.subscribe('k1');
+      await sleep(RECONNECT_WINDOW_MS);
+
+      expect(sockets).toHaveLength(2);
+    }, 10_000);
+  });
 });
