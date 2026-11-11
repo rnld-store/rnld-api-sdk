@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.9.0] - 2026-11-11
+### Added
+- `RnldConflictError` (409) lançado por `whitelist.divergenciaFix()` quando um identificador da divergência já pertence a outro token da guild; expõe `conflictingTokens` e `conflicts` (`{ kind, value, token }`). Requer `rnld-api` com a checagem de conflito em `/whitelists/divergencefix`.
+
 ## [1.8.0] - 2026-11-02
 ### Added
 - `MultiEventsClient`: tratamento dos close codes do `rnld-bots-websocket` em `/ws/multi`, exportados como `CLOSE_NO_SUBSCRIPTIONS` (4001) e `CLOSE_TOO_MANY_INVALID_KEYS` (4002).

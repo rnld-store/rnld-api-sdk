@@ -87,6 +87,9 @@ export class WhitelistClient {
   /**
    * Resolve uma divergência de whitelist.
    * Requer `divergenceId`.
+   *
+   * Lança `RnldConflictError` (409) se algum identificador já pertencer a outro
+   * token da guild; `conflictingTokens` traz os tokens que já os possuem.
    */
   async divergenciaFix(params: DivergenciaFixParams): Promise<DivergenciaFixResponse> {
     const url = `${this.baseUrl}/whitelists/divergencefix`;

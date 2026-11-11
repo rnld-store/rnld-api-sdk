@@ -6,7 +6,13 @@ export {
   CLOSE_NO_SUBSCRIPTIONS,
   CLOSE_TOO_MANY_INVALID_KEYS,
 } from './MultiEventsClient.js';
-export { RnldApiError, RnldNotFoundError, RnldUnauthorizedError } from './errors.js';
+export {
+  RnldApiError,
+  RnldNotFoundError,
+  RnldUnauthorizedError,
+  RnldConflictError,
+} from './errors.js';
+export type { RnldIdentityConflict } from './errors.js';
 export type {
   RnldClientOptions,
   QueryWhitelistParams,

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { WhitelistClient } from '../WhitelistClient.js';
-import { RnldNotFoundError, RnldUnauthorizedError } from '../errors.js';
+import { RnldConflictError, RnldNotFoundError, RnldUnauthorizedError } from '../errors.js';
 
 const BASE_URL = 'https://api.rnld.dev';
 const API_KEY = 'test-key';
@@ -189,6 +189,29 @@ describe('WhitelistClient.divergenciaFix', () => {
     await expect(client.divergenciaFix({ divergenceId: 'DIV-WPLP-25749' })).rejects.toBeInstanceOf(
       RnldUnauthorizedError,
     );
+  });
+
+  it('lança RnldConflictError em 409 com os tokens conflitantes', async () => {
+    vi.stubGlobal(
+      'fetch',
+      mockFetch(409, {
+        status: false,
+        code: 409,
+        mensagem: 'Um ou mais identificadores já pertencem a outro token desta guild.',
+        conflicting_tokens: ['ABCD'],
+        conflicts: [{ kind: 'license', value: 'abc', token: 'ABCD' }],
+      }),
+    );
+
+    const err = await client
+      .divergenciaFix({ divergenceId: 'DIV-WPLP-25749' })
+      .catch((e: unknown) => e);
+
+    expect(err).toBeInstanceOf(RnldConflictError);
+    const conflict = err as RnldConflictError;
+    expect(conflict.statusCode).toBe(409);
+    expect(conflict.conflictingTokens).toEqual(['ABCD']);
+    expect(conflict.conflicts[0]).toEqual({ kind: 'license', value: 'abc', token: 'ABCD' });
   });
 });
 

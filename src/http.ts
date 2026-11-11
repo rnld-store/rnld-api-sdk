@@ -1,4 +1,5 @@
-import { RnldApiError, RnldNotFoundError, RnldUnauthorizedError } from './errors.js';
+import { RnldApiError, RnldConflictError, RnldNotFoundError, RnldUnauthorizedError } from './errors.js';
+import type { RnldIdentityConflict } from './errors.js';
 
 export async function get<T>(
   url: string,
@@ -92,6 +93,20 @@ async function handleResponse<T>(res: Response): Promise<T> {
   if (res.status === 404) {
     const msg = (data as { mensagem?: string })?.mensagem ?? 'Não encontrado';
     throw new RnldNotFoundError(msg);
+  }
+
+  if (res.status === 409) {
+    const body = data as {
+      mensagem?: string;
+      conflicting_tokens?: string[];
+      conflicts?: RnldIdentityConflict[];
+    };
+    throw new RnldConflictError(
+      body?.mensagem ?? 'Conflito',
+      body?.conflicting_tokens ?? [],
+      body?.conflicts ?? [],
+      data,
+    );
   }
 
   if (!res.ok) {
