@@ -19,6 +19,17 @@ const client = new RnldClient({
 });
 ```
 
+### Usando a API v2
+
+A API v2 (`https://api-v2.rnld.dev`) mantém o mesmo contrato de rotas; ative com a flag `v2`:
+
+```ts
+const client = new RnldClient({ apiKey: '...', guildId: '...', v2: true });
+```
+
+Para uma URL customizada (ex.: ambiente de teste), use `baseUrl` (tem precedência sobre `v2`).
+Na v2, `atualizaToken`/`divergenciaFix` lançam `RnldConflictError` (409) se o identificador pertencer a outro jogador.
+
 ## Rotas disponíveis
 
 ### `whitelist.query(params)` — consultar jogador

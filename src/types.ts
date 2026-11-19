@@ -5,6 +5,13 @@ export interface RnldClientOptions {
   guildId: string;
   /** URL do rnld-bots-websocket (ex: ws://localhost:8080/ws). Necessário para client.events */
   wsUrl?: string;
+  /**
+   * Usa a API v2 (`https://api-v2.rnld.dev`, modelo centrado no player). O contrato das rotas é o
+   * mesmo da v1. Padrão: `false` (v1, `https://api.rnld.dev`).
+   */
+  v2?: boolean;
+  /** URL base customizada da API (ex.: ambiente de teste). Tem precedência sobre `v2`. */
+  baseUrl?: string;
 }
 
 // ---------- Query ----------

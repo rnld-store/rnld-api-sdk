@@ -1,4 +1,4 @@
-export { RnldClient } from './RnldClient.js';
+export { RnldClient, resolveBaseUrl, BASE_URL_V1, BASE_URL_V2 } from './RnldClient.js';
 export { WhitelistClient } from './WhitelistClient.js';
 export { EventsClient } from './EventsClient.js';
 export {

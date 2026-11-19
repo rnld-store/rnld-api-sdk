@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.0] - 2026-11-18
+### Added
+- Flag `v2: true` em `RnldClient` para usar a API v2 (`https://api-v2.rnld.dev`); o padrão continua a v1 (`https://api.rnld.dev`). O contrato das rotas é o mesmo.
+- Opção `baseUrl` para apontar para uma URL customizada (precedência sobre `v2`) e helper `resolveBaseUrl`, com as constantes `BASE_URL_V1`/`BASE_URL_V2`.
+### Notes
+- Na v2, `whitelist.atualizaToken()`/`divergenciaFix()` lançam `RnldConflictError` (409) quando o identificador pertence a outro jogador, e `deletarToken`/resets de staff podem responder 400 (`RnldApiError`) se o jogador estiver banido em alguma guild.
+
 ## [1.9.0] - 2026-11-11
 ### Added
 - `RnldConflictError` (409) lançado por `whitelist.divergenciaFix()` quando um identificador da divergência já pertence a outro token da guild; expõe `conflictingTokens` e `conflicts` (`{ kind, value, token }`). Requer `rnld-api` com a checagem de conflito em `/whitelists/divergencefix`.
